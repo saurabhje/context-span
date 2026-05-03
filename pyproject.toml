@@ -1,0 +1,9 @@
+[project]
+name = "context-span"
+version = "0.1.0"
+description = "Infrastructure layer that enables AI agents to share reasoning, decisions, and context across workflows"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.13.3",
+]
