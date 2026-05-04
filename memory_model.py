@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field
 from time import time
+
+from pydantic import BaseModel, Field
+
 
 class MemoryEntry(BaseModel):
     id: str
@@ -12,6 +14,7 @@ class MemoryEntry(BaseModel):
     handoff_message: str | None = None
     timestamp: float = Field(default_factory=time)
 
+
 class GlobalMemory(BaseModel):
     goal: str
-    log: list[MemoryLog] = Field(default_factory=list)
+    log: list[MemoryEntry] = Field(default_factory=list)
