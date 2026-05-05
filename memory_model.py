@@ -9,8 +9,8 @@ class MemoryEntry(BaseModel):
     type: str
     action: str
     reason: str
-    files_changed: list[str]
-    change_summary: str | None = None
+    files_changed: list[str] | None = None
+    summary: str
     handoff_message: str | None = None
     timestamp: float = Field(default_factory=time)
 
