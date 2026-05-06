@@ -1,15 +1,30 @@
-from memory_model import GlobalMemory, MemoryEntry
+from mcp.server.fastmcp import FastMCP
+from sqlmodel import Session, select
+
+from models import Logs, Projects, engine
+
+mcp = FastMCP("context-span")
 
 
 class MemoryManager:
     def __init__(self, goal: str):
-        self.memory = GlobalMemory(goal=goal)
+        self.project = Projects(goal=goal)
+        with Session(engine) as session:
+            session.add(self.project)
+            session.commit()
+            session.refresh(self.project)
+            self.project_id = self.project.id
 
-    def writeLog(self, data: MemoryEntry):
-        self.memory.log.append(data)
+    def writeLog(self, data: Logs):
+        with Session(engine) as session:
+            session.add(data)
+            session.commit()
 
     def readLog(self):
-        return self.memory.log
+        with Session(engine) as session:
+            statement = select(Logs).where(Logs.project_id == self.project.id)
+            logs = session.exec(statement).all()
+            return logs
 
 
 class ContextEngine:
@@ -36,17 +51,50 @@ class ContextEngine:
         return res
 
 
-s1 = MemoryManager(goal="testing")
-c1 = ContextEngine(s1)
-new_entry = MemoryEntry(
-    id="1",
-    agent="claude",
-    type="nigga",
-    action="nigga",
-    reason="nigga",
-    files_changed=["nigga", "nigga2"],
-    summary="did nigga",
-    handoff_message="nigga",
-)
-s1.writeLog(new_entry)
-print(c1.specified_context("agent", "claude"))
+memory: MemoryManager | None = None
+context: ContextEngine | None = None
+
+
+@mcp.tool()
+def initalizeProject(goal: str):
+    global memory, context
+    memory = MemoryManager(goal=goal)
+    context = ContextEngine(memory)
+
+
+@mcp.tool()
+def add_log(
+    agent: str,
+    action: str,
+    type: str,
+    reason: str,
+    summary: str,
+    files_changed: str | None = None,
+    handoff_message: str | None = None,
+) -> str:
+    if memory is None or context is None:
+        return f"initialize a project"
+
+    entry = Logs(
+        project_id=memory.project_id,
+        agent=agent,
+        action=action,
+        type=type,
+        reason=reason,
+        summary=summary,
+        files_changed=files_changed,
+        handoff_message=handoff_message,
+    )
+    memory.writeLog(entry)
+    return "log written"
+
+
+@mcp.tool()
+def read_log() -> list:
+    if memory is None or context is None:
+        return f"initialize a project"
+    return context.global_context()
+
+
+if __name__ == "__main__":
+    mcp.run(transport="stdio")

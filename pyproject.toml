@@ -5,5 +5,7 @@ description = "Infrastructure layer that enables AI agents to share reasoning, d
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "mcp[cli]>=1.27.0",
     "pydantic>=2.13.3",
+    "sqlmodel>=0.0.38",
 ]
