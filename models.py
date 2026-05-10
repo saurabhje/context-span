@@ -8,6 +8,7 @@ class Logs(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     project_id: UUID = Field(foreign_key="projects.id", index=True)
     agent: str = Field(index=True)
+    type: str
     action: str
     reason: str
     summary: str
