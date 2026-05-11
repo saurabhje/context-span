@@ -12,8 +12,7 @@ class Logs(SQLModel, table=True):
     action: str
     reason: str
     summary: str
-    files_changed: str | None = None
-    handoff_message: str | None = None
+    artifacts: str | None = None
     timestamp: float = Field(default_factory=time, index=True)
 
 

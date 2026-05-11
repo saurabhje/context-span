@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 
 from core.context import ContextEngine
 from core.memory import MemoryManager
-from models import Logs, Projects, engine
+from models import Logs
 
 mcp = FastMCP("context-span")
 
@@ -26,8 +26,7 @@ def add_log(
     action: str,
     reason: str,
     summary: str,
-    files_changed: list[str] | None = None,
-    handoff_message: str | None = None,
+    artifacts: list[str] | None = None,
 ) -> str:
     if memory is None or context is None:
         return "initialize a project"
@@ -39,8 +38,7 @@ def add_log(
         action=action,
         reason=reason,
         summary=summary,
-        files_changed=(json.dumps(files_changed) if files_changed else None),
-        handoff_message=handoff_message,
+        artifacts=(json.dumps(artifacts) if artifacts else None),
     )
     memory.writeLog(entry)
     return "log written"

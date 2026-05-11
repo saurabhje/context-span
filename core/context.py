@@ -17,10 +17,9 @@ class ContextEngine:
             "action": log.action,
             "reason": log.reason,
             "summary": log.summary,
-            "files_changed": [f for f in json.loads(log.files_changed) if f]
-            if log.files_changed
+            "artifacts": [f for f in json.loads(log.artifacts) if f]
+            if log.artifacts
             else [],
-            "handoff_message": log.handoff_message,
             "timestamp": log.timestamp,
         }
 
@@ -28,11 +27,8 @@ class ContextEngine:
         entries = self.memory.readLog(limit)
         if not entries:
             return []
-        last_entry = entries[0]
-
         return {
             "project_goal": self.memory.project_goal,
-            "handoff_message": last_entry.handoff_message if last_entry else None,
             "logs": [self.serialize_log(entry) for entry in entries],
         }
 
@@ -40,7 +36,7 @@ class ContextEngine:
         self,
         agent: str | None = None,
         action: str | None = None,
-        files_changed: str | None = None,
+        artifacts: str | None = None,
     ):
         with Session(engine) as session:
             statement = select(Logs).where(Logs.project_id == self.memory.project_id)
@@ -48,7 +44,11 @@ class ContextEngine:
                 statement = statement.where(Logs.agent == agent)
             if action:
                 statement = statement.where(Logs.action == action)
-            if files_changed:
-                statement = statement.where(Logs.files_changed.contains(files_changed))
+            if artifacts:
+                statement = statement.where(Logs.artifacts.contains(artifacts))
             logs = session.exec(statement).all()
             return [self.serialize_log(log) for log in logs]
+
+    def task_context(self, query: str):
+
+        pass
