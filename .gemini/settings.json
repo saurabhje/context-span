@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "context-span": {
+      "command": "uv",
+      "args": ["run", "python", "main.py"],
+      "trust": true
+    }
+  }
+}

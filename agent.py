@@ -1,0 +1,8 @@
+from groq import Groq
+
+client = Groq(api_key="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")
+response = client.chat.completions.create(
+    model="llama-3.3-70b-versatile",
+    messages=[{"role": "user", "content": "say hi"}]
+)
+print(response.choices[0].message.content)

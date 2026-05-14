@@ -6,7 +6,6 @@ from sqlmodel import Field, SQLModel, create_engine
 
 class Logs(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    project_id: UUID = Field(foreign_key="projects.id", index=True)
     agent: str = Field(index=True)
     type: str
     action: str
@@ -15,11 +14,7 @@ class Logs(SQLModel, table=True):
     artifacts: str | None = None
     timestamp: float = Field(default_factory=time, index=True)
 
-
-class Projects(SQLModel, table=True):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
-    goal: str = Field(index=True)
-
-
 engine = create_engine("sqlite:///database.db")
-SQLModel.metadata.create_all(engine)
+
+def init_db():
+    SQLModel.metadata.create_all(engine)

@@ -1,17 +1,11 @@
 from sqlmodel import Session, select
 
-from models import Logs, Projects, engine
+from models import Logs, engine
 
 
 class MemoryManager:
     def __init__(self, goal: str):
-        self.project = Projects(goal=goal)
-        with Session(engine) as session:
-            session.add(self.project)
-            session.commit()
-            session.refresh(self.project)
-            self.project_id = self.project.id
-            self.project_goal = self.project.goal
+        self.goal = goal
 
     def writeLog(self, data: Logs):
         with Session(engine) as session:
@@ -20,11 +14,7 @@ class MemoryManager:
 
     def readLog(self, limit: int | None = None):
         with Session(engine) as session:
-            statement = (
-                select(Logs)
-                .where(Logs.project_id == self.project_id)
-                .order_by(Logs.timestamp.desc())
-            )
+            statement = (select(Logs).order_by(Logs.timestamp.desc()))
             if limit:
                 statement = statement.limit(limit)
             logs = session.exec(statement).all()

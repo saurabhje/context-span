@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 
 from core.context import ContextEngine
 from core.memory import MemoryManager
-from models import Logs
+from models import Logs, init_db
 
 mcp = FastMCP("context-span")
 
@@ -13,10 +13,20 @@ context: ContextEngine | None = None
 
 
 @mcp.tool()
-def initalize_project(goal: str):
+def initalize_project(goal: str) -> str:
     global memory, context
+    init_db()
     memory = MemoryManager(goal=goal)
     context = ContextEngine(memory)
+    add_log(
+        agent="System",
+        type="INITIALIZATION",
+        action="Project Started",
+        reason="User initialized project",
+        summary=f"Goal: {goal}"
+    )
+
+    return f"Project initialized with goal: {goal}"
 
 
 @mcp.tool()
@@ -29,10 +39,9 @@ def add_log(
     artifacts: list[str] | None = None,
 ) -> str:
     if memory is None or context is None:
-        return "initialize a project"
+        return "Please initialize the project first."
 
     entry = Logs(
-        project_id=memory.project_id,
         agent=agent,
         type=type,
         action=action,
@@ -43,7 +52,6 @@ def add_log(
     memory.writeLog(entry)
     return "log written"
 
-
 @mcp.tool()
 def read_log():
     if memory is None or context is None:
@@ -52,4 +60,4 @@ def read_log():
 
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
+    mcp.run()

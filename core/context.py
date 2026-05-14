@@ -50,5 +50,5 @@ class ContextEngine:
             return [self.serialize_log(log) for log in logs]
 
     def task_context(self, query: str):
-
         pass
+    
