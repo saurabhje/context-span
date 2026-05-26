@@ -1,5 +1,5 @@
 import json
-
+import os
 from mcp.server.fastmcp import FastMCP
 
 from core.context import ContextEngine
@@ -8,25 +8,15 @@ from models import Logs, init_db
 
 mcp = FastMCP("context-span")
 
-memory: MemoryManager | None = None
-context: ContextEngine | None = None
+project_name = os.environ.get("PROJECT_NAME")
+project_goal = os.environ.get("PROJECT_GOAL")
 
+memory = None
+context = None
 
-@mcp.tool()
-def initalize_project(goal: str) -> str:
-    global memory, context
-    init_db()
-    memory = MemoryManager(goal=goal)
+if project_name  and project_goal:
+    memory = MemoryManager(goal=project_goal, project_name=project_name)
     context = ContextEngine(memory)
-    add_log(
-        agent="System",
-        type="INITIALIZATION",
-        action="Project Started",
-        reason="User initialized project",
-        summary=f"Goal: {goal}"
-    )
-
-    return f"Project initialized with goal: {goal}"
 
 
 @mcp.tool()
@@ -39,7 +29,7 @@ def add_log(
     artifacts: list[str] | None = None,
 ) -> str:
     if memory is None or context is None:
-        return "Please initialize the project first."
+        return "Error: Please initialize the project first."
 
     entry = Logs(
         agent=agent,
@@ -55,7 +45,7 @@ def add_log(
 @mcp.tool()
 def read_log():
     if memory is None or context is None:
-        return "initialize a project"
+        return "Error: Please initialize the project first."
     return context.global_context()
 
 
