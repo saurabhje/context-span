@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "groq>=1.2.0",
+    "lancedb>=0.30.2",
     "mcp[cli]>=1.27.0",
     "ollama>=0.6.2",
     "pydantic>=2.13.3",

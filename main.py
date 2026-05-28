@@ -4,7 +4,9 @@ from mcp.server.fastmcp import FastMCP
 
 from core.context import ContextEngine
 from core.memory import MemoryManager
-from models import Logs, init_db
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 mcp = FastMCP("context-span")
 
@@ -31,21 +33,25 @@ def add_log(
     if memory is None or context is None:
         return "Error: Please initialize the project first."
 
-    entry = Logs(
-        agent=agent,
-        type=type,
-        action=action,
-        reason=reason,
-        summary=summary,
-        artifacts=(json.dumps(artifacts) if artifacts else None),
-    )
-    memory.writeLog(entry)
-    return "log written"
+    try:
+        memory.writeLog({
+        "agent": agent,
+        "type": type,
+        "action": action,
+        "reason": reason,
+        "summary": summary,
+        "artifacts": json.dumps(artifacts) if artifacts else "[]",
+    })
+        return "Log added successfully."
+    except Exception as e:
+        return f"Error writing log: {str(e)}"
 
 @mcp.tool()
-def read_log():
+def read_log(query: str | None = None, limit: int | None = None):
     if memory is None or context is None:
         return "Error: Please initialize the project first."
+    if query:
+        return context.task_context(query, limit)
     return context.global_context()
 
 
