@@ -1,4 +1,5 @@
 import json
+
 from core.memory import MemoryManager
 
 
@@ -18,19 +19,18 @@ class ContextEngine:
             else [],
             "timestamp": log["timestamp"],
         }
-    
-    def global_context(self):
-        logs = self.memory.readLog()
+
+    def global_context(self, limit: int):
+        logs = self.memory.readLog(limit)
         return {
-            "project_goal": self.memory.goal,
+            "project_name": self.memory.project_name,
             "logs": logs,
         }
 
-    def task_context(self, query: str, limit):
+    def task_context(self, query, limit: int):
         results = self.memory.queryLog(query, limit)
         return {
-            "project_goal": self.memory.goal,
+            "project_goal": self.memory.project_name,
             "query": query,
             "relevant_logs": [self.serialize_log(result) for result in results],
         }
-    

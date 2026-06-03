@@ -1,24 +1,21 @@
 import json
-import os
 from mcp.server.fastmcp import FastMCP
 
 from core.context import ContextEngine
 from core.memory import MemoryManager
-from dotenv import load_dotenv, find_dotenv
-
-load_dotenv(find_dotenv())
 
 mcp = FastMCP("context-span")
 
-project_name = os.environ.get("PROJECT_NAME")
-project_goal = os.environ.get("PROJECT_GOAL")
+memory: MemoryManager | None = None
+context: ContextEngine | None = None
 
-memory = None
-context = None
 
-if project_name  and project_goal:
-    memory = MemoryManager(goal=project_goal, project_name=project_name)
+@mcp.tool()
+def initialize_project(project_name: str):
+    global memory, context
+    memory = MemoryManager(project_name=project_name)
     context = ContextEngine(memory)
+    return f"Project {project_name} initialized"
 
 
 @mcp.tool()
@@ -34,26 +31,41 @@ def add_log(
         return "Error: Please initialize the project first."
 
     try:
-        memory.writeLog({
-        "agent": agent,
-        "type": type,
-        "action": action,
-        "reason": reason,
-        "summary": summary,
-        "artifacts": json.dumps(artifacts) if artifacts else "[]",
-    })
+        memory.writeLog(
+            {
+                "agent": agent,
+                "type": type,
+                "action": action,
+                "reason": reason,
+                "summary": summary,
+                "artifacts": json.dumps(artifacts) if artifacts else "[]",
+            }
+        )
         return "Log added successfully."
     except Exception as e:
         return f"Error writing log: {str(e)}"
 
+
 @mcp.tool()
-def read_log(query: str | None = None, limit: int | None = None):
+def global_context(limit: int | None = None):
+    """
+    use this tool when entire global context needs to be retrieved, like in case of generating
+    a summary, or agent swapping
+    """
     if memory is None or context is None:
         return "Error: Please initialize the project first."
-    if query:
-        return context.task_context(query, limit)
-    return context.global_context()
+    return context.global_context(limit)
+
+
+@mcp.tool()
+def task_context(query: str, limit: int = 10):
+    """
+    use this tool when the context for any specific task/query has been asked
+    """
+    if memory is None or context is None:
+        return "Error: Please initialize the project first."
+    return context.task_context(query, limit)
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="streamable-http")
