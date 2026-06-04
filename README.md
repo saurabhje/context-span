@@ -1,11 +1,29 @@
-# Context-Span
+#  Context-Span
+**context-span** is semantic memory and context retrieval layer for AI agents 
+Agents can store decisions, summaries, artifacts and reasoning in a shared memory space.
 
-> imagine all your agents sharing the context of whats happening in your project and who did what, yes this solves that.
+#### Why
+AI agents lose context across sessions, tools and providers.
+Context-Span provides persistent, retrievable memory independent of the underlying model.
 
-## Memory Layer for LLM Agents
+### Arhitecture
+![alt text](Untitled-2026-04-22-0442.png)
 
-The library provides a **global memory layer** that allows multiple LLM agents to read and write shared context. It abstracts the underlying storage so agents can seamlessly switch between models such as Claude, Codex, or any future LLM without changing their code. The memory API supports atomic updates, retrieval by keys, and expiration policies, enabling coordinated workflows in distributed multi‑agent environments.
+### Installation
+```
+uv sync
+ollama pull nomic-embed-text
+uv run main.py
+```
 
-### Key Features
-- Model‑agnostic interface – works with Claude, Codex, GPT, or custom-agents(MCP compliant) etc.
-- Real‑time context propagation across nodes.
+### Retrieval flow
+```Query
+↓
+Embedding
+↓
+Vector Search
+↓
+Relevant Logs
+↓
+Context
+```
