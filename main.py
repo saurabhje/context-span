@@ -12,6 +12,9 @@ context: ContextEngine | None = None
 
 @mcp.tool()
 def initialize_project(project_name: str):
+    """
+    Intializing a new project with project_name and creating the vector db file, or connecting to it if already exists
+    """
     global memory, context
     memory = MemoryManager(project_name=project_name)
     context = ContextEngine(memory)
@@ -27,6 +30,9 @@ def add_log(
     summary: str,
     artifacts: list[str] | None = None,
 ) -> str:
+    """
+    Used to log the action of an agent with proper formating
+    """
     if memory is None or context is None:
         return "Error: Please initialize the project first."
 
@@ -50,7 +56,7 @@ def add_log(
 def global_context(limit: int | None = None):
     """
     use this tool when entire global context needs to be retrieved, like in case of generating
-    a summary, or agent swapping
+    a summary, or agent swapping, starting a new fresh session
     """
     if memory is None or context is None:
         return "Error: Please initialize the project first."
